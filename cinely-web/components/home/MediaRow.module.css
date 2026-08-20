@@ -1,0 +1,78 @@
+.rowWrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: var(--space-8);
+  padding: 0 var(--row-padding-x);
+}
+
+.rowTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+  letter-spacing: -0.01em;
+  transition: color var(--duration-fast) ease;
+}
+
+.rowWrapper:hover .rowTitle {
+  color: var(--text-primary);
+}
+
+.carouselContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: var(--space-2) 0;
+  width: 100%;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.chevronButton {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3rem;
+  z-index: var(--z-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 13, 13, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: var(--text-primary);
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease, background-color var(--duration-fast) ease;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.chevronLeft {
+  left: 0;
+}
+
+.chevronRight {
+  right: 0;
+}
+
+.rowWrapper:hover .chevronButton,
+.chevronButton:focus-visible {
+  opacity: 1;
+}
+
+.chevronButton:hover {
+  background: rgba(13, 13, 13, 0.95);
+  color: var(--accent);
+}

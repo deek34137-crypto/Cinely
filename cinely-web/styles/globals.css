@@ -1,0 +1,196 @@
+/*
+ * Cinely Design System — Global CSS
+ * Dark-only, cinematic streaming UI.
+ * No framework. No utility classes. CSS custom properties only.
+ */
+
+/* ============================================================
+   1. RESET & BASE
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hide scrollbars globally — carousels use JS scroll */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+/* ============================================================
+   2. DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* --- Colours --- */
+
+  /* Background hierarchy */
+  --bg-base:     hsl(0 0% 5%);       /* #0d0d0d — page background */
+  --bg-surface:  hsl(0 0% 10%);      /* #1a1a1a — cards, modals */
+  --bg-elevated: hsl(0 0% 15%);      /* #252525 — dropdowns, popovers */
+  --bg-overlay:  rgba(0, 0, 0, 0.75);/* modal scrim */
+
+  /* Text hierarchy */
+  --text-primary:   hsl(0 0% 100%);      /* #ffffff */
+  --text-secondary: hsl(0 0% 90%);       /* #e5e5e5 */
+  --text-muted:     hsl(0 0% 50%);       /* #808080 */
+  --text-disabled:  hsl(0 0% 30%);       /* #4d4d4d */
+
+  /* Accent — electric blue (not Netflix red) */
+  --accent:        hsl(210 85% 55%);    /* #2196f3-ish */
+  --accent-hover:  hsl(210 85% 65%);
+  --accent-dim:    hsl(210 85% 40%);
+
+  /* Semantic */
+  --score-green:   hsl(134 55% 56%);    /* #46d369 — match score */
+  --danger:        hsl(0 72% 51%);      /* #dc2626 */
+  --warning:       hsl(38 92% 50%);     /* #f59e0b */
+  --success:       hsl(142 71% 45%);    /* #22c55e */
+
+  /* Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.15);
+  --border-strong:  rgba(255, 255, 255, 0.30);
+
+  /* --- Typography --- */
+  --font-sans: 'Inter', 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  --text-xs:   0.75rem;   /* 12px */
+  --text-sm:   0.875rem;  /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg:   1.125rem;  /* 18px */
+  --text-xl:   1.25rem;   /* 20px */
+  --text-2xl:  1.5rem;    /* 24px */
+  --text-3xl:  1.875rem;  /* 30px */
+  --text-4xl:  2.25rem;   /* 36px */
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold: 600;
+  --weight-bold:    700;
+
+  /* --- Spacing --- */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* --- Layout --- */
+  /* Horizontal padding for all full-width sections */
+  --row-padding-x:    clamp(1.5rem, 4vw, 4rem);
+  /* Poster/card sizes */
+  --card-min-width:   clamp(110px, 14vw, 180px);
+  --card-aspect:      2 / 3;                    /* poster ratio */
+  --card-backdrop-aspect: 16 / 9;              /* backdrop ratio */
+  /* Hero banner height */
+  --hero-height:      clamp(400px, 56.25vw, 85vh);
+  /* Navbar height */
+  --navbar-height:    64px;
+  /* Modal max width */
+  --modal-max-width:  48rem;
+
+  /* --- Animation & Timing --- */
+  --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+
+  --duration-fast:   150ms;
+  --duration-base:   250ms;
+  --duration-slow:   350ms;
+
+  --transition-card: transform var(--duration-base) var(--ease-out-cubic);
+  --transition-nav:  background-color var(--duration-slow) var(--ease-in-out);
+  --transition-fade: opacity var(--duration-base) var(--ease-in-out);
+
+  /* --- Borders & Radius --- */
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+  --radius-xl:  12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-card:  0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 25px 60px rgba(0, 0, 0, 0.8);
+  --shadow-nav:   0 2px 20px rgba(0, 0, 0, 0.4);
+
+  /* --- Z-index scale --- */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-overlay: 40;
+  --z-modal:   50;
+  --z-toast:   60;
+  --z-nav:     70;
+}
+
+/* ============================================================
+   3. UTILITY CLASSES
+   Only the minimum needed globally. Component styles go in CSS Modules.
+   ============================================================ */
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus ring — applies when navigating with keyboard */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
