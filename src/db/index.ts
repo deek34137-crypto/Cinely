@@ -914,13 +914,33 @@ export async function initDatabase(customPath?: string): Promise<IDatabaseClient
   if (dbInstance) return dbInstance;
 
   if (config.DATABASE_URL && !config.USE_SQLITE_MEM && !customPath) {
-    dbInstance = new PostgresDatabaseClient(config.DATABASE_URL);
+    const pgClient = new PostgresDatabaseClient(config.DATABASE_URL);
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const schemaPath = path.join(process.cwd(), "src", "db", "schema.sql");
+      const distSchemaPath = path.join(process.cwd(), "dist", "db", "schema.sql");
+      const filePath = fs.existsSync(schemaPath)
+        ? schemaPath
+        : fs.existsSync(distSchemaPath)
+        ? distSchemaPath
+        : null;
+
+      if (filePath) {
+        const sql = fs.readFileSync(filePath, "utf8");
+        await pgClient.exec(sql);
+      }
+    } catch (err) {
+      console.warn("Database schema initialization notice:", err);
+    }
+    dbInstance = pgClient;
   } else {
     dbInstance = new InMemoryDatabaseClient();
   }
 
   return dbInstance;
 }
+
 
 export function getDatabase(): IDatabaseClient {
   if (!dbInstance) {

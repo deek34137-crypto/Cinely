@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS media_items (
     trailer_url TEXT,
     rating REAL,
     popularity_score REAL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS media_external_mappings (
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS media_external_mappings (
     provider_name TEXT NOT NULL,
     external_id TEXT NOT NULL,
     raw_payload TEXT,
-    last_synced_at TEXT NOT NULL DEFAULT (datetime('now')),
+    last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(provider_name, external_id),
     FOREIGN KEY(media_item_id) REFERENCES media_items(id) ON DELETE CASCADE
 );
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS addon_catalog (
     is_configurable INTEGER NOT NULL DEFAULT 0,
     is_default INTEGER NOT NULL DEFAULT 0,
     raw_manifest TEXT NOT NULL,
-    synced_at TEXT NOT NULL DEFAULT (datetime('now'))
+    synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -103,8 +103,8 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL,
     display_name TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'user',
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_addon_preferences (
@@ -118,8 +118,8 @@ CREATE TABLE IF NOT EXISTS user_addon_preferences (
     nonce_iv TEXT,
     auth_tag TEXT,
     encrypted_config TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, addon_id),
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(addon_id) REFERENCES addon_catalog(id) ON DELETE CASCADE
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS user_progress (
     duration_seconds REAL NOT NULL DEFAULT 0,
     completed INTEGER NOT NULL DEFAULT 0,
     client_sequence INTEGER NOT NULL DEFAULT 0,
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, media_id, season_number, episode_number),
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(media_id) REFERENCES media_items(id) ON DELETE CASCADE
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS user_refresh_tokens (
     user_id TEXT NOT NULL,
     token_hash TEXT NOT NULL UNIQUE,
     expires_at TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     revoked_at TEXT,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS user_watchlist (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
     media_id TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, media_id),
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(media_id) REFERENCES media_items(id) ON DELETE CASCADE
@@ -174,4 +174,5 @@ CREATE TABLE IF NOT EXISTS user_watchlist (
 
 CREATE INDEX IF NOT EXISTS idx_user_watchlist_user_created
 ON user_watchlist(user_id, created_at DESC);
+
 
