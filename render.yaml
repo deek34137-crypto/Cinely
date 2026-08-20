@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: cinely-engine
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: node dist/server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: HOST
+        value: 0.0.0.0
+      - key: USE_SQLITE_MEM
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: CINELY_MASTER_KEY
+        value: cinely-production-master-key-32byteslong!
+      - key: CORS_ALLOWED_ORIGINS
+        value: http://localhost:3000,http://localhost:3001
