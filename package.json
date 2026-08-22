@@ -42,7 +42,7 @@
     "hls.js": "^1.6.16",
     "lucide-react": "^0.544.0",
     "media-icons": "^1.1.5",
-    "next": "15.2.0",
+    "next": "^15.2.9",
     "next-auth": "^5.0.0-beta.29",
     "postcss": "^8.4.49",
     "postgres": "^3.4.7",
