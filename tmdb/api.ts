@@ -8,7 +8,7 @@ import {
 } from "./models";
 
 const baseUrl = "https://api.themoviedb.org/3";
-const apiKey = process.env.TMDB_API_KEY || "84146cb62e57d516be1735d3d1911fae";
+const apiKey = process.env.TMDB_API_KEY || "23d4cc8d072b7d9afc33b4d50399e8df";
 
 // Resilient fallback mock data for when TMDB_API_KEY is not configured
 const MOCK_MOVIES: TmdbMovieItem[] = [
