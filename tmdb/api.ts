@@ -8,6 +8,7 @@ import {
 } from "./models";
 
 const baseUrl = "https://api.themoviedb.org/3";
+const readAccessToken = process.env.TMDB_READ_ACCESS_TOKEN || process.env.TMDB_ACCESS_TOKEN;
 const apiKey = process.env.TMDB_API_KEY || "23d4cc8d072b7d9afc33b4d50399e8df";
 
 // Resilient fallback mock data for when TMDB_API_KEY is not configured
@@ -153,15 +154,22 @@ async function tmdbFetch<T>(endpoint: string, params: Record<string, string | un
     Object.entries(params).filter(([, v]) => v !== undefined)
   ) as Record<string, string>;
 
-  const query = new URLSearchParams({ api_key: apiKey, ...cleanParams }).toString();
-  const url = `${baseUrl}/${endpoint}?${query}`;
+  const queryParams = readAccessToken ? cleanParams : { api_key: apiKey, ...cleanParams };
+  const query = new URLSearchParams(queryParams).toString();
+  const url = `${baseUrl}/${endpoint}${query ? `?${query}` : ""}`;
+
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  };
+
+  if (readAccessToken) {
+    headers["Authorization"] = `Bearer ${readAccessToken}`;
+  }
 
   try {
     const res = await fetch(url, {
       next: { revalidate: 3600 },
-      headers: {
-        Accept: "application/json",
-      },
+      headers,
     });
 
     if (!res.ok) {
