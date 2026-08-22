@@ -8,7 +8,10 @@ import {
 } from "./models";
 
 const baseUrl = "https://api.themoviedb.org/3";
-const readAccessToken = process.env.TMDB_READ_ACCESS_TOKEN || process.env.TMDB_ACCESS_TOKEN;
+const readAccessToken =
+  process.env.TMDB_READ_ACCESS_TOKEN ||
+  process.env.TMDB_ACCESS_TOKEN ||
+  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyM2Q0Y2M4ZDA3MmI3ZDlhZmMzM2I0ZDUwMzk5ZThkZiIsIm5iZiI6MTc4NDgyNjI2MS41ODUsInN1YiI6IjZhNjI0OTk1ODRlMmU4NTc4YmE3MTEwMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.ELBUsfbOukgFKKYRm2A01zycNLWuFfGQOwxP1bx3fec";
 const apiKey = process.env.TMDB_API_KEY || "23d4cc8d072b7d9afc33b4d50399e8df";
 
 // Resilient fallback mock data for when TMDB_API_KEY is not configured
