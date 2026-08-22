@@ -1,0 +1,28 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: cinely-gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    restart: unless-stopped
+    environment:
+      - VPN_SERVICE_PROVIDER=custom
+      - HTTPPROXY=on
+      - HTTPPROXY_LOG=off
+    ports:
+      - "8888:8888"
+
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: cinely-flaresolverr
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=info
+      - CAPTCHA_SOLVER=none
+      - PROXY_URL=http://gluetun:8888
+    ports:
+      - "8191:8191"
+    depends_on:
+      - gluetun
