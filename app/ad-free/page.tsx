@@ -54,7 +54,7 @@ export default function AdFreePage() {
           </div>
 
           <p className="text-sm text-zinc-400 leading-relaxed">
-            If you switch to any of our 14 third-party embed fallback servers, we enforce strict <code className="text-zinc-300 font-mono bg-zinc-900 px-1 py-0.5 rounded">sandbox</code> attributes. For 100% defense against external scripts, we recommend installing a verified ad-blocker:
+            If you switch to any of our 14 third-party embed fallback servers, we provide educational warnings and anti-popup defense. For 100% defense against external scripts, we recommend installing a verified ad-blocker:
           </p>
 
           <div className="pt-2">

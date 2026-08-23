@@ -178,14 +178,13 @@ export function ScrapePlayerShell({
         ) : selectedServer.id === "scrape" && scrapeLoading ? (
           <ScrapingOverlay activeProvider="vidking" resolved={scrapeResolved} error={!!scrapeError} />
         ) : (
-          /* Sandboxed Embed Iframe Fallback */
+          /* Embed Iframe Fallback */
           <iframe
             src={embedUrl}
             title={title}
             className="w-full h-full border-0"
             allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
           />
         )}
       </div>

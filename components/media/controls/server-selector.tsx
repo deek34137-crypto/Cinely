@@ -71,7 +71,7 @@ export function ServerSelector({
           </DropdownMenuItem>
 
           <div className="px-2 py-1.5 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mt-2 border-t border-white/5 pt-2">
-            14 Sandboxed Embed Servers
+            14 High-Speed Embed Mirrors
           </div>
 
           {videoServers.map((server) => (

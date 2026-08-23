@@ -81,7 +81,7 @@ export default async function HomePage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white">14 Sandboxed Embeds</h4>
+              <h4 className="text-xs font-bold text-white">14 Embed Mirrors</h4>
               <p className="text-[11px] text-zinc-400">VidSrc, VidKing, VidNest, SuperEmbed & 10 more.</p>
             </div>
           </div>
