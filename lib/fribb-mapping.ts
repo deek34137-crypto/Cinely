@@ -42,10 +42,9 @@ const COMMON_MAPPINGS: Record<number, { anilistId: number; title: string }> = {
   129: { anilistId: 199, title: "Spirited Away" },
   // Your Name
   372058: { anilistId: 21519, title: "Your Name." },
-  // Overflow
+  // Overflow (TMDB 95897 & 97539)
+  95897: { anilistId: 113417, title: "Overflow" },
   97539: { anilistId: 113417, title: "Overflow" },
-  // Rent-a-Girlfriend
-  95897: { anilistId: 113813, title: "Rent-a-Girlfriend" },
   // Mushoku Tensei: Jobless Reincarnation
   94664: { anilistId: 108465, title: "Mushoku Tensei: Jobless Reincarnation" },
 };
