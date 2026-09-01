@@ -87,13 +87,23 @@ export async function GET(
 
     // 3. Pipe Media Segments (TS / MP4 / M4S / Audio / Key Chunks)
     const headers = new Headers();
-    ["content-length", "content-range", "accept-ranges", "content-type"].forEach((k) => {
+    ["content-length", "content-range", "accept-ranges"].forEach((k) => {
       const val = upstreamRes.headers.get(k);
       if (val) headers.set(k, val);
     });
 
-    if (!headers.has("Content-Type")) {
-      headers.set("Content-Type", contentType || "video/mp2t");
+    // Enforce valid video MIME type so HLS demuxers don't reject disguised segments (.jpg/.png)
+    if (
+      contentType.includes("image/") ||
+      contentType.includes("octet-stream") ||
+      !contentType ||
+      playback.url.includes(".ts") ||
+      playback.url.includes(".jpg") ||
+      playback.url.includes(".png")
+    ) {
+      headers.set("Content-Type", "video/mp2t");
+    } else {
+      headers.set("Content-Type", contentType);
     }
     headers.set("Cache-Control", "public, max-age=3600");
     headers.set("Access-Control-Allow-Origin", "*");

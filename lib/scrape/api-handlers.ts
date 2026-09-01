@@ -50,30 +50,37 @@ export async function handleScrapeRequest(
       ? animeScrapers.filter((s) => s.id === providerId || `anivexa-${s.id}` === providerId)
       : animeScrapers;
 
-    for (const scraper of scrapersToRun) {
-      try {
-        const result = await scraper.scrape(targetQueryOrId, episode, dub);
-        if (result && result.url) {
-          const proxiedUrl = createProxiedMediaUrl(
-            result.url,
-            result.referer || "https://anivexa-stream-api.deek34137.workers.dev/",
-            undefined,
-            result.streamType === "hls" ? "stream.m3u8" : "manifest.mpd"
-          );
-          return {
-            success: true,
-            providerId: result.providerId,
-            providerName: result.providerName,
-            playUrl: proxiedUrl,
-            originalUrl: result.url,
-            streamType: result.streamType,
-            subtitles: result.subtitles,
-            audioTracks: result.audioTracks,
-          };
-        }
-      } catch (err) {
-        console.warn(`Anime scraper ${scraper.id} failed:`, err);
+    // Concurrently race scrapers so whichever provider (reanime, anibd, anikoto, etc.) resolves first is used immediately
+    const scrapePromises = scrapersToRun.map(async (scraper) => {
+      const result = await scraper.scrape(targetQueryOrId, episode, dub);
+      if (result && result.url) {
+        return result;
       }
+      throw new Error(`Scraper ${scraper.id} yielded no stream`);
+    });
+
+    try {
+      const result = await Promise.any(scrapePromises);
+      if (result && result.url) {
+        const proxiedUrl = createProxiedMediaUrl(
+          result.url,
+          result.referer || "https://anivexa-stream-api.deek34137.workers.dev/",
+          undefined,
+          result.streamType === "hls" ? "stream.m3u8" : "manifest.mpd"
+        );
+        return {
+          success: true,
+          providerId: result.providerId,
+          providerName: result.providerName,
+          playUrl: proxiedUrl,
+          originalUrl: result.url,
+          streamType: result.streamType,
+          subtitles: result.subtitles,
+          audioTracks: result.audioTracks,
+        };
+      }
+    } catch {
+      console.warn("All anime scrapers failed to resolve a stream");
     }
   }
 
