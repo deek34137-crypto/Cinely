@@ -144,6 +144,18 @@ export function ScrapePlayerShell({
         </div>
 
         <div className="flex items-center gap-2">
+          {selectedServer.id !== "scrape" && (
+            <button
+              onClick={() => {
+                setSelectedServer(scrapeServer);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-semibold text-purple-300 transition-all cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <span>Switch to Direct (Ad-Free)</span>
+            </button>
+          )}
+
           {selectedServer.id === "scrape" && (
             <button
               onClick={triggerScrape}
