@@ -1,5 +1,9 @@
 import { tmdb } from "@/tmdb/api";
-import { mapTmdbMovieToMediaItem, mapTmdbTvToMediaItem } from "@/lib/cards/mappers";
+import {
+  mapTmdbMovieToMediaItem,
+  mapTmdbTvToMediaItem,
+  mapTmdbAnimeToMediaItem,
+} from "@/lib/cards/mappers";
 import { HeroBackground } from "@/components/hero/hero-background";
 import { HeroContent } from "@/components/hero/hero-content";
 import { MediaCarousel } from "@/components/media/media-carousel";
@@ -19,7 +23,11 @@ export default async function HomePage() {
       tmdb.movie.trending("week", "1"),
       tmdb.tv.trending("week", "1"),
       tmdb.movie.topRated("1"),
-      tmdb.tv.discover({ with_genres: "16", sort_by: "popularity.desc" }),
+      tmdb.tv.discover({
+        with_genres: "16",
+        with_original_language: "ja",
+        sort_by: "popularity.desc",
+      }),
     ]);
 
     if (moviesRes.status === "fulfilled") trendingMoviesRaw = moviesRes.value;
@@ -33,7 +41,7 @@ export default async function HomePage() {
   const trendingMovies = (trendingMoviesRaw.results || []).slice(0, 16).map(mapTmdbMovieToMediaItem);
   const trendingTv = (trendingTvRaw.results || []).slice(0, 16).map(mapTmdbTvToMediaItem);
   const topRatedMovies = (topRatedMoviesRaw.results || []).slice(0, 16).map(mapTmdbMovieToMediaItem);
-  const popularAnime = (popularAnimeRaw.results || []).slice(0, 16).map(mapTmdbTvToMediaItem);
+  const popularAnime = (popularAnimeRaw.results || []).slice(0, 16).map(mapTmdbAnimeToMediaItem);
 
   const heroItem = trendingMovies[0] || {
     id: 27205,

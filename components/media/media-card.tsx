@@ -11,6 +11,8 @@ export function MediaCard({ media }: { media: MediaItem }) {
   const targetHref =
     media.mediaType === "movie"
       ? `/movies/${media.tmdbId || media.id}`
+      : media.mediaType === "anime"
+      ? `/anime/${media.tmdbId || media.id}`
       : `/tvshows/${media.tmdbId || media.id}`;
 
   const year = media.releaseDate ? new Date(media.releaseDate).getFullYear() : null;
@@ -38,7 +40,13 @@ export function MediaCard({ media }: { media: MediaItem }) {
         {/* Media type badge */}
         <div className="absolute top-2.5 left-2.5">
           <Badge
-            variant={media.mediaType === "movie" ? "default" : "secondary"}
+            variant={
+              media.mediaType === "movie"
+                ? "default"
+                : media.mediaType === "anime"
+                ? "glow"
+                : "secondary"
+            }
             className="text-[9px] uppercase font-black py-0 h-4 shadow-md backdrop-blur-md bg-black/60 border-white/10"
           >
             {media.mediaType}

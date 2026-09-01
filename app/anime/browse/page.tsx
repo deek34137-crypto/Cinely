@@ -1,5 +1,5 @@
 import { tmdb } from "@/tmdb/api";
-import { mapTmdbTvToMediaItem } from "@/lib/cards/mappers";
+import { mapTmdbAnimeToMediaItem } from "@/lib/cards/mappers";
 import { MediaCard } from "@/components/media/media-card";
 import { MediaItem } from "@/lib/domain/typings";
 import { Sparkles } from "lucide-react";
@@ -25,7 +25,7 @@ export default async function BrowseAnimePage({
     console.error("Failed to load browse anime:", err);
   }
 
-  const animeList: MediaItem[] = (animeRaw.results || []).map(mapTmdbTvToMediaItem);
+  const animeList: MediaItem[] = (animeRaw.results || []).map(mapTmdbAnimeToMediaItem);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-8">

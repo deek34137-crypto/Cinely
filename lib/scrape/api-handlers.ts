@@ -42,18 +42,21 @@ export async function handleScrapeRequest(
   } = payload;
 
   if (mediaKind === "anime" || (!tmdbId && title)) {
-    const searchTitle = title || `Anime ${tmdbId}`;
+    // Resolve AniList ID from tmdbId or title
+    const resolved = await resolveTmdbToAnilist(tmdbId, title);
+    const targetQueryOrId = resolved.anilistId || resolved.title || title || (tmdbId ? `Anime ${tmdbId}` : "");
+
     const scrapersToRun = providerId
-      ? animeScrapers.filter((s) => s.id === providerId)
+      ? animeScrapers.filter((s) => s.id === providerId || `anivexa-${s.id}` === providerId)
       : animeScrapers;
 
     for (const scraper of scrapersToRun) {
       try {
-        const result = await scraper.scrape(searchTitle, episode, dub);
+        const result = await scraper.scrape(targetQueryOrId, episode, dub);
         if (result && result.url) {
           const proxiedUrl = createProxiedMediaUrl(
             result.url,
-            result.referer,
+            result.referer || "https://anivexa-stream-api.deek34137.workers.dev/",
             undefined,
             result.streamType === "hls" ? "stream.m3u8" : "manifest.mpd"
           );
@@ -69,7 +72,7 @@ export async function handleScrapeRequest(
           };
         }
       } catch (err) {
-        console.warn(`Scraper ${scraper.id} failed:`, err);
+        console.warn(`Anime scraper ${scraper.id} failed:`, err);
       }
     }
   }

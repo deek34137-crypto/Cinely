@@ -39,10 +39,13 @@ export function AnimePlayerSection({
       <ScrapePlayerShell
         tmdbId={tmdbId}
         mediaType="tv"
+        mediaKind="anime"
+        mediaTitle={title}
         title={`${title} — Episode ${currentEpisode} (${isDub ? "Dub" : "Sub"})`}
         poster={poster}
         season={1}
         episode={currentEpisode}
+        dub={isDub}
         onEnded={() => {
           if (currentEpisode < episodeCount) {
             setCurrentEpisode((prev) => prev + 1);

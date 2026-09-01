@@ -123,7 +123,10 @@ export default async function AnimeDetailsPage({
         </section>
 
         {animeDetails.similar && animeDetails.similar.length > 0 && (
-          <MediaCarousel title="Similar Anime Series" items={animeDetails.similar} />
+          <MediaCarousel
+            title="Similar Anime Series"
+            items={animeDetails.similar.map((item: any) => ({ ...item, mediaType: "anime" }))}
+          />
         )}
       </div>
     </div>

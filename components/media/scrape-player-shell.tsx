@@ -15,22 +15,28 @@ import { Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 export interface ScrapePlayerShellProps {
   tmdbId: number;
   mediaType: "movie" | "tv";
+  mediaKind?: "movie" | "tv" | "anime";
   title: string;
+  mediaTitle?: string;
   poster?: string;
   season?: number;
   episode?: number;
   imdbId?: string | null;
+  dub?: boolean;
   onEnded?: () => void;
 }
 
 export function ScrapePlayerShell({
   tmdbId,
   mediaType,
+  mediaKind,
   title,
+  mediaTitle,
   poster,
   season = 1,
   episode = 1,
   imdbId,
+  dub = false,
   onEnded,
 }: ScrapePlayerShellProps) {
   const { selectedServer, playbackMode, setPlaybackMode, setSelectedServer } = useServerStore();
@@ -67,15 +73,18 @@ export function ScrapePlayerShell({
     setScrapeResolved(false);
 
     try {
+      const isAnime = mediaKind === "anime";
       const res = await fetch("/api/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mediaKind: "tmdb",
+          mediaKind: isAnime ? "anime" : "tmdb",
           tmdbId,
           mediaType,
+          title: mediaTitle || title,
           season,
           episode,
+          dub,
         }),
       });
 
@@ -88,7 +97,7 @@ export function ScrapePlayerShell({
         setStreamData({
           playUrl: data.playUrl,
           streamType: data.streamType || "hls",
-          providerName: data.providerName || "VidKing",
+          providerName: data.providerName || (isAnime ? "ReAnime HLS" : "VidKing"),
           subtitles: data.subtitles || [],
         });
         setScrapeResolved(true);
@@ -104,7 +113,7 @@ export function ScrapePlayerShell({
     } finally {
       setScrapeLoading(false);
     }
-  }, [selectedServer.id, tmdbId, mediaType, season, episode, setPlaybackMode]);
+  }, [selectedServer.id, tmdbId, mediaType, mediaKind, mediaTitle, title, season, episode, dub, setPlaybackMode]);
 
   // Re-trigger scrape when media/episode changes if in scrape mode
   React.useEffect(() => {

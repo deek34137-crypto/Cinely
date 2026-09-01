@@ -1,86 +1,134 @@
 import { ScrapeStreamResult } from "../../domain/typings";
+import { resolveTmdbToAnilist } from "../../fribb-mapping";
 import { scrapeFetch } from "../fetch";
 
-function decryptAllAnimeXor(str: string): string {
-  try {
-    return str
-      .match(/.{1,2}/g)
-      ?.map((hex) => String.fromCharCode(parseInt(hex, 16) ^ 56))
-      .join("") || str;
-  } catch {
-    return str;
-  }
+const ANIVEXA_BASE_URL = "https://anivexa-stream-api.deek34137.workers.dev";
+
+export interface AnivexaWatchResponse {
+  anime?: string;
+  slug?: string;
+  ep?: number;
+  audio?: "sub" | "dub";
+  server?: string;
+  stream_url?: string;
+  redirect_url?: string;
+  streams?: Array<{
+    url: string;
+    type: string;
+    server?: string;
+  }>;
+  subtitles?: Array<{
+    url: string;
+    language: string;
+    format: string;
+    default?: boolean;
+  }>;
+  intro?: {
+    start: number;
+    end: number;
+    title?: string;
+  } | null;
+  outro?: {
+    start: number;
+    end: number;
+    title?: string;
+  } | null;
 }
 
-export async function scrapeAllAnime(
-  query: string,
+export async function scrapeAnivexaProvider(
+  provider: string,
+  providerDisplayName: string,
+  queryOrId: string | number,
   episode = 1,
   dub = false
 ): Promise<ScrapeStreamResult | null> {
   try {
-    const gqlQuery = `query($search: SearchInput) { shows(search: $search, limit: 1) { edges { _id name availableEpisodesDetail } } }`;
-    const res = await scrapeFetch("https://api.allanime.day/api", {
-      method: "POST",
+    let anilistId: number | undefined;
+
+    if (typeof queryOrId === "number" && queryOrId > 0) {
+      anilistId = queryOrId;
+    } else if (typeof queryOrId === "string" && !isNaN(Number(queryOrId)) && Number(queryOrId) > 0) {
+      anilistId = Number(queryOrId);
+    } else {
+      const resolved = await resolveTmdbToAnilist(undefined, String(queryOrId));
+      anilistId = resolved.anilistId;
+    }
+
+    if (!anilistId) {
+      console.warn(`[Anivexa] Could not resolve AniList ID for query: "${queryOrId}"`);
+      return null;
+    }
+
+    const audioMode = dub ? "dub" : "sub";
+    const epSlug = `${provider}-${episode}`;
+    const watchUrl = `${ANIVEXA_BASE_URL}/watch/${provider}/${anilistId}/${audioMode}/${epSlug}`;
+
+    const res = await scrapeFetch(watchUrl, {
+      timeoutMs: 8000,
+      retries: 1,
       headers: {
-        "Content-Type": "application/json",
-        Referer: "https://allanime.to",
+        Accept: "application/json",
       },
-      body: JSON.stringify({
-        query: gqlQuery,
-        variables: {
-          search: {
-            query,
-            mode: dub ? "dub" : "sub",
-          },
-        },
-      }),
-      timeoutMs: 6000,
     });
 
-    if (!res.ok) return null;
-    const data = await res.json();
-    const showId = data?.data?.shows?.edges?.[0]?._id;
-
-    if (showId) {
-      const epGql = `query($showId: String!, $translationType: String!, $episodeString: String!) { episode(showId: $showId, translationType: $translationType, episodeString: $episodeString) { sourceUrls } }`;
-      const epRes = await scrapeFetch("https://api.allanime.day/api", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Referer: "https://allanime.to" },
-        body: JSON.stringify({
-          query: epGql,
-          variables: {
-            showId,
-            translationType: dub ? "dub" : "sub",
-            episodeString: String(episode),
-          },
-        }),
-        timeoutMs: 6000,
-      });
-
-      if (epRes.ok) {
-        const epData = await epRes.json();
-        const sources = epData?.data?.episode?.sourceUrls || [];
-        for (const src of sources) {
-          if (src.sourceUrl) {
-            let url = src.sourceUrl;
-            if (url.startsWith("--")) {
-              url = decryptAllAnimeXor(url.slice(2));
-            }
-            if (url.includes(".m3u8") || url.includes(".mp4")) {
-              return {
-                providerId: "allanime",
-                providerName: "AllAnime GraphQL",
-                streamType: url.includes(".m3u8") ? "hls" : "mp4",
-                url,
-                referer: "https://allanime.to",
-              };
-            }
-          }
-        }
-      }
+    if (!res.ok) {
+      return null;
     }
-    return null;
-  } catch {
+
+    const data = (await res.json()) as AnivexaWatchResponse;
+
+    let streamUrl = data.stream_url;
+    if (!streamUrl && data.streams && data.streams.length > 0) {
+      const hlsStream =
+        data.streams.find((s) => s.type === "hls" || s.url?.includes(".m3u8")) ||
+        data.streams[0];
+      streamUrl = hlsStream?.url;
+    }
+
+    if (!streamUrl) {
+      return null;
+    }
+
+    const subtitles = (data.subtitles || []).map((sub) => ({
+      lang: sub.language || "English",
+      url: sub.url,
+    }));
+
+    return {
+      providerId: `anivexa-${provider}`,
+      providerName: providerDisplayName,
+      streamType: streamUrl.includes(".mpd") ? "dash" : "hls",
+      url: streamUrl,
+      referer: ANIVEXA_BASE_URL,
+      subtitles,
+      audioTracks: [
+        {
+          lang: dub ? "en" : "ja",
+          label: dub ? "English Dub" : "Japanese Audio",
+        },
+      ],
+    };
+  } catch (err: any) {
+    console.warn(`[Anivexa] Provider ${provider} error:`, err?.message || err);
     return null;
   }
 }
+
+export const scrapeReAnime = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("reanime", "ReAnime Engine (HLS)", q, ep, dub);
+
+export const scrapeAniKoto = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("anikoto", "AniKoto Cloud", q, ep, dub);
+
+export const scrapeJustAnime = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("justanime", "JustAnime Fast", q, ep, dub);
+
+export const scrapeKAA = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("kaa", "KickAssAnime HD", q, ep, dub);
+
+export const scrapeHiAnime = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("hianime", "HiAnime Server", q, ep, dub);
+
+export const scrapeAnimeGG = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("animegg", "AnimeGG Direct", q, ep, dub);
+

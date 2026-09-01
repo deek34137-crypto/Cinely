@@ -41,6 +41,23 @@ export function mapTmdbTvToMediaItem(item: TmdbTvItem): MediaItem {
   };
 }
 
+export function mapTmdbAnimeToMediaItem(item: TmdbTvItem): MediaItem {
+  return {
+    id: item.id,
+    tmdbId: item.id,
+    title: item.name || item.original_name || "Untitled Anime",
+    originalTitle: item.original_name,
+    overview: item.overview || "",
+    posterUrl: tmdbImage.poster(item.poster_path),
+    backdropUrl: tmdbImage.backdrop(item.backdrop_path),
+    mediaType: "anime",
+    releaseDate: item.first_air_date,
+    voteAverage: item.vote_average,
+    voteCount: item.vote_count,
+    popularity: item.popularity,
+  };
+}
+
 export function mapTmdbMovieDetails(details: TmdbMovieDetails): MovieDetails {
   const cast: CastMember[] = (details.credits?.cast || []).slice(0, 18).map((c) => ({
     id: c.id,
