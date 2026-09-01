@@ -5,6 +5,8 @@ import {
   mapTmdbTvToMediaItem,
   mapTmdbAnimeToMediaItem,
 } from "@/lib/cards/mappers";
+import { searchAniList } from "@/lib/anilist";
+import { MediaItem } from "@/lib/domain/typings";
 
 export const dynamic = "force-dynamic";
 
@@ -17,23 +19,57 @@ export async function GET(request: Request) {
   }
 
   try {
-    const raw = await tmdb.search.multi(query, "1");
-    const results = (raw.results || [])
-      .filter((item: any) => item.media_type === "movie" || item.media_type === "tv")
-      .slice(0, 8)
-      .map((item: any) => {
+    const [tmdbRes, anilistRes] = await Promise.allSettled([
+      tmdb.search.multi(query, "1"),
+      searchAniList(query, 5),
+    ]);
+
+    const results: MediaItem[] = [];
+    const seenTitles = new Set<string>();
+
+    // 1. Process TMDB Results
+    if (tmdbRes.status === "fulfilled" && tmdbRes.value?.results) {
+      for (const item of tmdbRes.value.results) {
+        if (item.media_type !== "movie" && item.media_type !== "tv") continue;
         const isAnime =
           item.genre_ids?.includes(16) ||
           item.origin_country?.includes("JP") ||
           item.original_language === "ja";
 
-        if (item.media_type === "movie") {
-          return mapTmdbMovieToMediaItem(item);
-        }
-        return isAnime ? mapTmdbAnimeToMediaItem(item) : mapTmdbTvToMediaItem(item);
-      });
+        const mapped =
+          item.media_type === "movie"
+            ? mapTmdbMovieToMediaItem(item)
+            : isAnime
+            ? mapTmdbAnimeToMediaItem(item)
+            : mapTmdbTvToMediaItem(item);
 
-    return NextResponse.json({ results });
+        results.push(mapped);
+        if (mapped.title) seenTitles.add(mapped.title.toLowerCase().trim());
+      }
+    }
+
+    // 2. Process AniList Non-TMDB Results
+    if (anilistRes.status === "fulfilled" && Array.isArray(anilistRes.value)) {
+      for (const al of anilistRes.value) {
+        const title = al.title?.english || al.title?.romaji || al.title?.native || "Anime";
+        if (seenTitles.has(title.toLowerCase().trim())) continue;
+
+        results.push({
+          id: `al-${al.id}`,
+          tmdbId: al.id,
+          title,
+          mediaType: "anime",
+          posterUrl: al.coverImage?.extraLarge || al.coverImage?.large || "",
+          backdropUrl: al.bannerImage || al.coverImage?.extraLarge || "",
+          overview: al.description?.replace(/<[^>]*>/g, "") || "",
+          voteAverage: al.averageScore ? al.averageScore / 10 : undefined,
+          releaseDate: "",
+        });
+        seenTitles.add(title.toLowerCase().trim());
+      }
+    }
+
+    return NextResponse.json({ results: results.slice(0, 10) });
   } catch (error) {
     return NextResponse.json({ results: [] });
   }

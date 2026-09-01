@@ -1,5 +1,6 @@
 import { tmdb } from "@/tmdb/api";
 import { mapTmdbTvDetails } from "@/lib/cards/mappers";
+import { getAniListDetails } from "@/lib/anilist";
 import { AnimePlayerSection } from "@/components/media/anime-player-section";
 import { ExpandableCastGrid } from "@/components/media/expandable-cast-grid";
 import { MediaCarousel } from "@/components/media/media-carousel";
@@ -19,18 +20,49 @@ export default async function AnimeDetailsPage({
   const { id } = await params;
   let animeDetails: any = null;
 
-  try {
-    const raw = await tmdb.tv.detail(id);
-    animeDetails = mapTmdbTvDetails(raw);
-  } catch (error) {
-    console.error(`Failed to load anime ${id}:`, error);
+  // 1. Try TMDB if not explicitly an AniList ID
+  if (!id.startsWith("al-")) {
+    try {
+      const raw = await tmdb.tv.detail(id);
+      animeDetails = mapTmdbTvDetails(raw);
+    } catch {
+      // Non-TMDB anime, proceed to AniList
+    }
+  }
+
+  // 2. Direct fallback to AniList GraphQL for non-TMDB anime (OVAs, adult, unlisted titles)
+  if (!animeDetails) {
+    try {
+      const alMedia = await getAniListDetails(id);
+      if (alMedia) {
+        const title =
+          alMedia.title?.english || alMedia.title?.romaji || alMedia.title?.native || "Anime";
+        animeDetails = {
+          id: `al-${alMedia.id}`,
+          tmdbId: alMedia.id,
+          anilistId: alMedia.id,
+          title,
+          posterUrl: alMedia.coverImage?.extraLarge || alMedia.coverImage?.large || "",
+          backdropUrl: alMedia.bannerImage || alMedia.coverImage?.extraLarge || "",
+          overview: alMedia.description?.replace(/<[^>]*>/g, "") || "No overview available.",
+          numberOfEpisodes: alMedia.episodes || 12,
+          voteAverage: alMedia.averageScore ? alMedia.averageScore / 10 : undefined,
+          status: alMedia.status,
+          genres: alMedia.genres || ["Anime"],
+          cast: [],
+          similar: [],
+        };
+      }
+    } catch (error) {
+      console.error(`Failed to load AniList anime ${id}:`, error);
+    }
   }
 
   if (!animeDetails) {
     notFound();
   }
 
-  const tmdbId = Number(animeDetails.tmdbId || animeDetails.id);
+  const tmdbId = Number(String(animeDetails.tmdbId || animeDetails.id).replace(/\D/g, ""));
 
   return (
     <div className="relative min-h-screen pb-20">
