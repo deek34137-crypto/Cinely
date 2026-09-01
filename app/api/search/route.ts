@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { tmdb } from "@/tmdb/api";
-import { mapTmdbMovieToMediaItem, mapTmdbTvToMediaItem } from "@/lib/cards/mappers";
+import {
+  mapTmdbMovieToMediaItem,
+  mapTmdbTvToMediaItem,
+  mapTmdbAnimeToMediaItem,
+} from "@/lib/cards/mappers";
 import { MediaItem } from "@/lib/domain/typings";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +23,15 @@ export async function GET(request: Request) {
     const results: MediaItem[] = (raw.results || [])
       .filter((item: any) => item.media_type === "movie" || item.media_type === "tv")
       .map((item: any) => {
+        const isAnime =
+          item.genre_ids?.includes(16) ||
+          item.origin_country?.includes("JP") ||
+          item.original_language === "ja";
+
         if (item.media_type === "movie") {
           return mapTmdbMovieToMediaItem(item);
         }
-        return mapTmdbTvToMediaItem(item);
+        return isAnime ? mapTmdbAnimeToMediaItem(item) : mapTmdbTvToMediaItem(item);
       });
 
     return NextResponse.json({

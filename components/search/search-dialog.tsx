@@ -49,6 +49,8 @@ export function SearchDialog({
     onOpenChange(false);
     if (item.mediaType === "movie") {
       router.push(`/movies/${item.tmdbId || item.id}`);
+    } else if (item.mediaType === "anime") {
+      router.push(`/anime/${item.tmdbId || item.id}`);
     } else {
       router.push(`/tvshows/${item.tmdbId || item.id}`);
     }
