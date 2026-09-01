@@ -42,6 +42,8 @@ const COMMON_MAPPINGS: Record<number, { anilistId: number; title: string }> = {
   129: { anilistId: 199, title: "Spirited Away" },
   // Your Name
   372058: { anilistId: 21519, title: "Your Name." },
+  // Overflow
+  97539: { anilistId: 113417, title: "Overflow" },
 };
 
 const mappingCache = new Map<number | string, { anilistId?: number; title?: string }>();

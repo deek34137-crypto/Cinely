@@ -78,11 +78,16 @@ export async function scrapeAnivexaProvider(
     const data = (await res.json()) as AnivexaWatchResponse;
 
     let streamUrl = data.stream_url;
+    let streamReferer = ANIVEXA_BASE_URL;
+
     if (!streamUrl && data.streams && data.streams.length > 0) {
       const hlsStream =
         data.streams.find((s) => s.type === "hls" || s.url?.includes(".m3u8")) ||
         data.streams[0];
       streamUrl = hlsStream?.url;
+      if (hlsStream && (hlsStream as any).referer) {
+        streamReferer = (hlsStream as any).referer;
+      }
     }
 
     if (!streamUrl) {
@@ -99,7 +104,7 @@ export async function scrapeAnivexaProvider(
       providerName: providerDisplayName,
       streamType: streamUrl.includes(".mpd") ? "dash" : "hls",
       url: streamUrl,
-      referer: ANIVEXA_BASE_URL,
+      referer: streamReferer,
       subtitles,
       audioTracks: [
         {
@@ -126,9 +131,19 @@ export const scrapeJustAnime = (q: string | number, ep = 1, dub = false) =>
 export const scrapeKAA = (q: string | number, ep = 1, dub = false) =>
   scrapeAnivexaProvider("kaa", "KickAssAnime HD", q, ep, dub);
 
+export const scrapeAniBD = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("anibd", "AniBD Direct (Ecchi/OVA/18+)", q, ep, dub);
+
+export const scrapeAniNeko = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("anineko", "AniNeko Stream", q, ep, dub);
+
 export const scrapeHiAnime = (q: string | number, ep = 1, dub = false) =>
   scrapeAnivexaProvider("hianime", "HiAnime Server", q, ep, dub);
 
 export const scrapeAnimeGG = (q: string | number, ep = 1, dub = false) =>
   scrapeAnivexaProvider("animegg", "AnimeGG Direct", q, ep, dub);
+
+export const scrapeAnimeNoSub = (q: string | number, ep = 1, dub = false) =>
+  scrapeAnivexaProvider("animenosub", "AnimeNoSub Raw", q, ep, dub);
+
 
