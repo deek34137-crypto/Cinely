@@ -7,7 +7,7 @@ import { ScrapeStatusCircle } from "./controls/scrape-status-circle";
 import { ScrapeHlsPlayer } from "./scrape-hls-player";
 import { ScrapeShakaDashPlayer } from "./scrape-shaka-dash-player";
 import { IntrodbSegmentControl } from "./controls/introdb-segment-control";
-import { useServerStore } from "@/lib/stores/server-store";
+import { scrapeServer, useServerStore } from "@/lib/stores/server-store";
 import { getEmbedUrl } from "@/lib/providers/embed-urls";
 import { MediaSegment } from "@/lib/playback/introdb";
 import { Sparkles, RefreshCw, AlertCircle } from "lucide-react";
