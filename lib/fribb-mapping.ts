@@ -44,6 +44,10 @@ const COMMON_MAPPINGS: Record<number, { anilistId: number; title: string }> = {
   372058: { anilistId: 21519, title: "Your Name." },
   // Overflow
   97539: { anilistId: 113417, title: "Overflow" },
+  // Rent-a-Girlfriend
+  95897: { anilistId: 113813, title: "Rent-a-Girlfriend" },
+  // Mushoku Tensei: Jobless Reincarnation
+  94664: { anilistId: 108465, title: "Mushoku Tensei: Jobless Reincarnation" },
 };
 
 const mappingCache = new Map<number | string, { anilistId?: number; title?: string }>();

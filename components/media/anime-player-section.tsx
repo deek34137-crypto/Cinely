@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ScrapePlayerShell } from "./scrape-player-shell";
 import { ScrapeAudioVariantControls } from "./controls/scrape-audio-variant-controls";
+import { scrapeServer, useServerStore } from "@/lib/stores/server-store";
 import { Sparkles, Play } from "lucide-react";
 
 export function AnimePlayerSection({
@@ -16,8 +17,16 @@ export function AnimePlayerSection({
   poster?: string;
   totalEpisodes?: number;
 }) {
+  const { selectedServer, setSelectedServer } = useServerStore();
   const [currentEpisode, setCurrentEpisode] = React.useState(1);
   const [isDub, setIsDub] = React.useState(false);
+
+  // Automatically activate Direct Ad-Free engine when opening anime player
+  React.useEffect(() => {
+    if (selectedServer.id !== "scrape") {
+      setSelectedServer(scrapeServer);
+    }
+  }, []);
 
   const episodeCount = Math.max(totalEpisodes || 12, 12);
   const epArray = Array.from({ length: episodeCount }, (_, i) => i + 1);
